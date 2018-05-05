@@ -9,7 +9,6 @@ const authenticate = require('../middlewares/authenticate');
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 
-
 // Amazon S3 Setup
 
 const aws = require('aws-sdk');
@@ -74,7 +73,8 @@ router.get('/', (req, res, next) => {
           username: doc.username,
           email: doc.email,
           password_digest: doc.password_digest,
-          userAvatar: doc.userAvatar
+          userAvatar: doc.userAvatar,
+          savedImages: doc.savedImages
         }
       })
     };
@@ -137,7 +137,8 @@ router.post('/', upload.single('userAvatar'), (req, res, next) => {
             username: req.body.username,
             email: req.body.email,
             password_digest,
-            userAvatar: ''
+            userAvatar: '',
+            savedImages: []
           });
           users
           .save()
@@ -173,8 +174,7 @@ router.patch('/:userId', authenticate, upload.single('userAvatar'), (req, res, n
   const id = req.params.userId;
   
   // response will include token with this data if it's necessary, otherwise old username and avatar will be added
-  let newUsername = '';
-  let newUserAvatar = '';
+  let newUsername, newUserAvatar, newSavedImages;
 
   // check if updates are required
   const updatedInf = {};
@@ -192,6 +192,11 @@ router.patch('/:userId', authenticate, upload.single('userAvatar'), (req, res, n
   if (req.file) {
     updatedInf.userAvatar = newAvatarUrl.split('?')[0];
     newUserAvatar = newAvatarUrl.split('?')[0];
+  };
+  if (req.body.savedImage) {
+    const newSavedImage = req.body.savedImage;
+    updatedInf.savedImages = req.currentUser.savedImages.concat(newSavedImage);
+    newSavedImages = req.currentUser.savedImages.concat(newSavedImage);
   };
 
   // check for unique username and email
@@ -218,7 +223,8 @@ router.patch('/:userId', authenticate, upload.single('userAvatar'), (req, res, n
             const token = jwt.sign({
               id: req.currentUser.id,
               username: newUsername ? newUsername : req.currentUser.username,
-              userAvatar: newUserAvatar ? newUserAvatar : req.currentUser.userAvatar
+              userAvatar: newUserAvatar ? newUserAvatar : req.currentUser.userAvatar,
+              savedImages: newSavedImages ? newSavedImages : req.currentUser.savedImages,
               },
               jwtSecretKey,
               {

@@ -22,7 +22,8 @@ router.post('/', (req, res, next) => {
             {
             id: user[0]._id,
             username: user[0].username,
-            userAvatar: user[0].userAvatar
+            userAvatar: user[0].userAvatar,
+            savedImages: user[0].savedImages
             },
             jwtSecretKey,
             {
