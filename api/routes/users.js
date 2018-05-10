@@ -159,7 +159,6 @@ router.post('/', upload.single('userAvatar'), (req, res, next) => {
 });
 
 router.patch('/:userId', authenticate, upload.single('userAvatar'), (req, res, next) => {
-
   //check if file was added 
   let newAvatarUrl = '';
   if (req.file) {
@@ -194,7 +193,7 @@ router.patch('/:userId', authenticate, upload.single('userAvatar'), (req, res, n
     newUserAvatar = newAvatarUrl.split('?')[0];
   };
   if (req.body.savedImage) {
-    const newSavedImage = req.body.savedImage;
+    const newSavedImage = JSON.parse(req.body.savedImage);
     updatedInf.savedImages = req.currentUser.savedImages.concat(newSavedImage);
     newSavedImages = req.currentUser.savedImages.concat(newSavedImage);
   };
